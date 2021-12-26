@@ -22,9 +22,53 @@ namespace ytArchiver.ViewModel
             }
         }
 
+        private string _videoURL;
+
+        public string VideoURL
+        {
+            get => _videoURL;
+
+            set
+            {
+                _videoURL = value;
+
+                OnPropertyChanged();
+
+                EnableDownload = !string.IsNullOrEmpty(value);
+            }
+        }
+
+        private bool _enableDownload;
+
+        public bool EnableDownload
+        {
+            get => _enableDownload;
+            
+            set
+            {
+                _enableDownload = value;
+
+                OnPropertyChanged();
+            }
+        }
+
         public MainViewModel()
         {
             VideoItems = new ObservableCollection<YTVideoItem>();
+        }
+
+        public bool AddDownloadToQueue()
+        {
+            var videoItem = new YTVideoItem(VideoURL, System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyVideos));
+
+            if (videoItem.Status == Enums.VideoStatus.ERROR)
+            {
+                return false;
+            }
+
+            VideoItems.Add(videoItem);
+
+            return true;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
