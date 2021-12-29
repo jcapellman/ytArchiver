@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 
 using ytArchiver.Enums;
 
@@ -16,7 +17,7 @@ namespace ytArchiver.Objects
 
         public string FileName { get; set; }
 
-        private YouTubeInfo ytInfo { get; set; }
+        private YouTubeVideo ytInfo { get; set; }
 
         public string DownloadPath { get; set; }
 
@@ -36,7 +37,7 @@ namespace ytArchiver.Objects
             DownloadPath = Path.Combine(downloadPath, ytInfo.FullName);
 
             Title = ytInfo.Title;
-            Resolution = ytInfo.Resolution;
+            Resolution = ytInfo.Resolution.ToString();
             FileName = ytInfo.FullName;
 
             Status = VideoStatus.QUEUED;
