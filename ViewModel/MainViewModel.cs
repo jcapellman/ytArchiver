@@ -68,6 +68,8 @@ namespace ytArchiver.ViewModel
 
             VideoItems.Add(videoItem);
 
+            VideoURL = string.Empty;
+
             return true;
         }
 
