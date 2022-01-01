@@ -2,6 +2,8 @@
 
 using Windows.UI.Popups;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Navigation;
+
 using ytArchiver.Objects;
 using ytArchiver.ViewModel;
 
@@ -16,6 +18,13 @@ namespace ytArchiver
             this.InitializeComponent();
 
             DataContext = new MainViewModel();
+        }
+
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        {
+            ViewModel.RunQueue();
+
+            base.OnNavigatedTo(e);
         }
 
         private async void btnAddToQueue_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)

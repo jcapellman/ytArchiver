@@ -1,19 +1,37 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 using ytArchiver.Enums;
 
 using VideoLibrary;
-using System;
-using System.Collections.Generic;
+
+using Windows.Storage;
 
 namespace ytArchiver.Objects
 {
-    public class YTVideoItem
+    public class YTVideoItem : INotifyPropertyChanged
     {
         public string Title { get; set; }
 
-        public VideoStatus Status { get; set; }
+        private VideoStatus _status { get; set; }
+
+        public VideoStatus Status
+        {
+            get
+            {
+                return _status;
+            }
+
+            set
+            {
+                _status = value;
+
+                OnPropertyChanged();
+            }
+        }
 
         public string Resolution { get; set; }
 
@@ -21,11 +39,9 @@ namespace ytArchiver.Objects
 
         private YouTubeVideo ytInfo { get; set; }
 
-        public string DownloadPath { get; set; }
-
         public YTVideoItem() { }
 
-        public YTVideoItem(string youTubeURL, string downloadPath)
+        public YTVideoItem(string youTubeURL)
         {
             IEnumerable<YouTubeVideo> videoInfos;
 
@@ -46,8 +62,6 @@ namespace ytArchiver.Objects
 
             ytInfo = videoInfos.FirstOrDefault(a => a.Resolution == 1080);
 
-            DownloadPath = Path.Combine(downloadPath, ytInfo.FullName);
-
             Title = ytInfo.Title;
             Resolution = ytInfo.Resolution.ToString();
             FileName = ytInfo.FullName;
@@ -55,13 +69,24 @@ namespace ytArchiver.Objects
             Status = VideoStatus.QUEUED;
         }
 
-        public void Download()
+        public async void Download()
         {
             Status = VideoStatus.DOWNLOADING;
 
-            File.WriteAllBytes(DownloadPath, ytInfo.GetBytes());
+            var videoLibrary = await KnownFolders.GetFolderForUserAsync(null, KnownFolderId.VideosLibrary);
+
+            var file = await videoLibrary.CreateFileAsync(FileName, CreationCollisionOption.ReplaceExisting);
+
+            await FileIO.WriteBytesAsync(file, ytInfo.GetBytes());
 
             Status = VideoStatus.DOWNLOADED;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

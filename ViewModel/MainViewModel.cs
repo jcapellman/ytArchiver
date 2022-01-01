@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
-
+using Windows.Storage;
 using ytArchiver.Objects;
 
 namespace ytArchiver.ViewModel
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        private BackgroundWorker _worker = new BackgroundWorker();
-
         private ObservableCollection<YTVideoItem> _videoItems;
 
         public ObservableCollection<YTVideoItem> VideoItems
@@ -63,35 +62,27 @@ namespace ytArchiver.ViewModel
         public MainViewModel()
         {
             VideoItems = new ObservableCollection<YTVideoItem>();
-
-            _worker.RunWorkerCompleted += _worker_RunWorkerCompleted;
-            _worker.DoWork += _worker_DoWork;
-            //_worker.RunWorkerAsync();
         }
 
-        private void _worker_DoWork(object sender, DoWorkEventArgs e)
+        internal async void RunQueue()
         {
-            if (VideoItems.Count == 0)
+            await System.Threading.Tasks.Task.Run(() => 
             {
-                return;
-            }
+                while (true)
+                {
+                    foreach (var item in VideoItems.Where(a => a.Status == Enums.VideoStatus.QUEUED))
+                    {
+                        item.Download();
+                    }
 
-            foreach (var item in VideoItems)
-            {
-                item.Download();
-            }
-        }
-
-        private void _worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            System.Threading.Thread.Sleep(500);
-
-            _worker.RunWorkerAsync();
+                    System.Threading.Thread.Sleep(500);
+                }
+            });
         }
 
         public bool AddDownloadToQueue()
         {
-            var videoItem = new YTVideoItem(VideoURL, System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyVideos));
+            var videoItem = new YTVideoItem(VideoURL);
 
             if (videoItem.Status == Enums.VideoStatus.ERROR)
             {
