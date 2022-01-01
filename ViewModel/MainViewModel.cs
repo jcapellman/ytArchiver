@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -8,6 +9,8 @@ namespace ytArchiver.ViewModel
 {
     public class MainViewModel : INotifyPropertyChanged
     {
+        private BackgroundWorker _worker = new BackgroundWorker();
+
         private ObservableCollection<YTVideoItem> _videoItems;
 
         public ObservableCollection<YTVideoItem> VideoItems
@@ -40,6 +43,11 @@ namespace ytArchiver.ViewModel
 
         private bool _enableDownload;
 
+        internal void RemoveItem(YTVideoItem item)
+        {
+            VideoItems.Remove(item);
+        }
+
         public bool EnableDownload
         {
             get => _enableDownload;
@@ -55,6 +63,30 @@ namespace ytArchiver.ViewModel
         public MainViewModel()
         {
             VideoItems = new ObservableCollection<YTVideoItem>();
+
+            _worker.RunWorkerCompleted += _worker_RunWorkerCompleted;
+            _worker.DoWork += _worker_DoWork;
+            //_worker.RunWorkerAsync();
+        }
+
+        private void _worker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            if (VideoItems.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var item in VideoItems)
+            {
+                item.Download();
+            }
+        }
+
+        private void _worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            System.Threading.Thread.Sleep(500);
+
+            _worker.RunWorkerAsync();
         }
 
         public bool AddDownloadToQueue()
