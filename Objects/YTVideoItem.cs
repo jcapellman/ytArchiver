@@ -4,6 +4,8 @@ using System.Linq;
 using ytArchiver.Enums;
 
 using VideoLibrary;
+using System;
+using System.Collections.Generic;
 
 namespace ytArchiver.Objects
 {
@@ -25,11 +27,21 @@ namespace ytArchiver.Objects
 
         public YTVideoItem(string youTubeURL, string downloadPath)
         {
-            var videoInfos = YouTube.Default.GetAllVideos(youTubeURL);
+            IEnumerable<YouTubeVideo> videoInfos;
 
-            if (videoInfos == null)
+            try
+            {
+                videoInfos = YouTube.Default.GetAllVideos(youTubeURL);
+
+                if (videoInfos == null)
+                {
+                    Status = VideoStatus.ERROR;
+                }
+            } catch (Exception)
             {
                 Status = VideoStatus.ERROR;
+
+                return;
             }
 
             ytInfo = videoInfos.FirstOrDefault(a => a.Resolution == 1080);
