@@ -39,7 +39,7 @@
 
             <TextBlock Grid.Row="0" Style="{StaticResource SubheaderTextBlockStyle}" Text="Queue" />
 
-            <ListView Grid.Row="1" ItemsSource="{Binding VideoItems, Mode=TwoWay}">
+            <ListView Grid.Row="1" ItemsSource="{Binding VideoItems, Mode=TwoWay}" SelectionMode="None">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -57,7 +57,7 @@
 
                             <TextBlock Grid.Column="0" Text="{Binding Title}" />
                             <TextBlock Grid.Column="1" Margin="20,0,0,0" Text="{Binding Status}" />
-                            <Button Grid.Column="2" HorizontalAlignment="Right" Content="Remove from Queue" />
+                            <Button Grid.Column="2" HorizontalAlignment="Right" Content="Remove from Queue" Click="btnRemoveQueue_Click" />
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
