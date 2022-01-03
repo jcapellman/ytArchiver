@@ -1,37 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 using ytArchiver.Enums;
 
 using VideoLibrary;
 
 using Windows.Storage;
+using System.Threading.Tasks;
 
 namespace ytArchiver.Objects
 {
-    public class YTVideoItem : INotifyPropertyChanged
+    public class YTVideoItem
     {
         public string Title { get; set; }
 
-        private VideoStatus _status { get; set; }
-
-        public VideoStatus Status
-        {
-            get
-            {
-                return _status;
-            }
-
-            set
-            {
-                _status = value;
-
-                OnPropertyChanged();
-            }
-        }
+        public VideoStatus Status { get; set; }
 
         public string Resolution { get; set; }
 
@@ -43,11 +27,11 @@ namespace ytArchiver.Objects
 
         public YTVideoItem(string youTubeURL)
         {
-            IEnumerable<YouTubeVideo> videoInfos;
+            List<YouTubeVideo> videoInfos;
 
             try
             {
-                videoInfos = YouTube.Default.GetAllVideos(youTubeURL);
+                videoInfos = YouTube.Default.GetAllVideos(youTubeURL).ToList();
 
                 if (videoInfos == null)
                 {
@@ -60,7 +44,7 @@ namespace ytArchiver.Objects
                 return;
             }
 
-            ytInfo = videoInfos.FirstOrDefault(a => a.Resolution == 1080);
+            ytInfo = videoInfos.OrderByDescending(a => a.Resolution).FirstOrDefault(a => a.AudioFormat != AudioFormat.Unknown);
 
             Title = ytInfo.Title;
             Resolution = ytInfo.Resolution.ToString();
@@ -69,7 +53,7 @@ namespace ytArchiver.Objects
             Status = VideoStatus.QUEUED;
         }
 
-        public async void Download()
+        public async Task<bool> Download()
         {
             Status = VideoStatus.DOWNLOADING;
 
@@ -80,13 +64,8 @@ namespace ytArchiver.Objects
             await FileIO.WriteBytesAsync(file, ytInfo.GetBytes());
 
             Status = VideoStatus.DOWNLOADED;
-        }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            return Status == VideoStatus.DOWNLOADED;
         }
     }
 }

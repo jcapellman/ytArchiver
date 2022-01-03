@@ -1,25 +1,24 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Windows.Storage;
+using System.Threading.Tasks;
+
+using Windows.UI.Xaml;
+
 using ytArchiver.Objects;
 
 namespace ytArchiver.ViewModel
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        private ObservableCollection<YTVideoItem> _videoItems;
+        private Visibility _downloading;
 
-        public ObservableCollection<YTVideoItem> VideoItems
+        public Visibility Downloading
         {
-            get => _videoItems;
+            get => _downloading;
 
             set
             {
-                _videoItems = value;
-
+                _downloading = value;
                 OnPropertyChanged();
             }
         }
@@ -42,11 +41,6 @@ namespace ytArchiver.ViewModel
 
         private bool _enableDownload;
 
-        internal void RemoveItem(YTVideoItem item)
-        {
-            VideoItems.Remove(item);
-        }
-
         public bool EnableDownload
         {
             get => _enableDownload;
@@ -61,39 +55,33 @@ namespace ytArchiver.ViewModel
 
         public MainViewModel()
         {
-            VideoItems = new ObservableCollection<YTVideoItem>();
+            Downloading = Visibility.Collapsed;
         }
 
-        internal async void RunQueue()
+        public async Task<bool> DownloadAsync()
         {
-            await System.Threading.Tasks.Task.Run(() => 
-            {
-                while (true)
-                {
-                    foreach (var item in VideoItems.Where(a => a.Status == Enums.VideoStatus.QUEUED))
-                    {
-                        item.Download();
-                    }
+            Downloading = Visibility.Visible;
 
-                    System.Threading.Thread.Sleep(500);
-                }
-            });
-        }
-
-        public bool AddDownloadToQueue()
-        {
             var videoItem = new YTVideoItem(VideoURL);
 
             if (videoItem.Status == Enums.VideoStatus.ERROR)
             {
+                VideoURL = string.Empty;
+
+                Downloading = Visibility.Collapsed;
+
                 return false;
             }
 
-            VideoItems.Add(videoItem);
-
             VideoURL = string.Empty;
 
-            return true;
+            EnableDownload = false;
+
+            var result = await videoItem.Download();
+
+            Downloading = Visibility.Collapsed;
+
+            return result;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
