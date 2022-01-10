@@ -23,6 +23,20 @@ namespace ytArchiver.ViewModel
             }
         }
 
+        private Visibility _infoVisibility;
+
+        public Visibility InfoVisibility
+        {
+            get => _infoVisibility;
+
+            set
+            {
+                _infoVisibility = value;
+
+                OnPropertyChanged();
+            }
+        }
+
         private string _videoURL;
 
         public string VideoURL
@@ -53,18 +67,32 @@ namespace ytArchiver.ViewModel
             }
         }
 
+        private YTVideoItem _videoItem;
+
+        public YTVideoItem VideoItem
+        {
+            get => _videoItem;
+
+            set
+            {
+                _videoItem = value;
+                OnPropertyChanged();
+            }
+        }
+
         public MainViewModel()
         {
             Downloading = Visibility.Collapsed;
+            InfoVisibility = Visibility.Collapsed;
         }
 
         public async Task<bool> DownloadAsync()
         {
             Downloading = Visibility.Visible;
 
-            var videoItem = new YTVideoItem(VideoURL);
+            VideoItem = new YTVideoItem(VideoURL);
 
-            if (videoItem.Status == Enums.VideoStatus.ERROR)
+            if (VideoItem.Status == Enums.VideoStatus.ERROR)
             {
                 VideoURL = string.Empty;
 
@@ -73,11 +101,13 @@ namespace ytArchiver.ViewModel
                 return false;
             }
 
+            InfoVisibility = Visibility.Visible;
+
             VideoURL = string.Empty;
 
             EnableDownload = false;
 
-            var result = await videoItem.Download();
+            var result = await VideoItem.Download();
 
             Downloading = Visibility.Collapsed;
 
