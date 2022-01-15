@@ -86,19 +86,19 @@ namespace ytArchiver.ViewModel
             InfoVisibility = Visibility.Collapsed;
         }
 
-        public async Task<bool> DownloadAsync()
+        public async Task<Enums.VideoStatus> DownloadAsync()
         {
             Downloading = Visibility.Visible;
 
             VideoItem = new YTVideoItem(VideoURL);
 
-            if (VideoItem.Status == Enums.VideoStatus.ERROR)
+            if (VideoItem.Status == Enums.VideoStatus.ERROR || VideoItem.Status == Enums.VideoStatus.INVALID_URL)
             {
                 VideoURL = string.Empty;
 
                 Downloading = Visibility.Collapsed;
 
-                return false;
+                return VideoItem.Status;
             }
 
             InfoVisibility = Visibility.Visible;
