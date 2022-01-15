@@ -37,9 +37,9 @@ namespace ytArchiver.Objects
                 {
                     Status = VideoStatus.ERROR;
                 }
-            } catch (Exception)
+            } catch (ArgumentException)
             {
-                Status = VideoStatus.ERROR;
+                Status = VideoStatus.INVALID_URL;
 
                 return;
             }
@@ -53,7 +53,7 @@ namespace ytArchiver.Objects
             Status = VideoStatus.QUEUED;
         }
 
-        public async Task<bool> Download()
+        public async Task<Enums.VideoStatus> Download()
         {
             Status = VideoStatus.DOWNLOADING;
 
@@ -65,7 +65,7 @@ namespace ytArchiver.Objects
 
             Status = VideoStatus.DOWNLOADED;
 
-            return Status == VideoStatus.DOWNLOADED;
+            return Status;
         }
     }
 }
