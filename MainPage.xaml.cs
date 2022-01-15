@@ -20,19 +20,26 @@ namespace ytArchiver
 
         private async void btnAddToQueue_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
+            var messageStr = "Unknown";
+
             var status = await ViewModel.DownloadAsync();
 
-            if (!status)
+            switch (status)
             {
-                var dialog = new MessageDialog("Failed to download");
-
-                await dialog.ShowAsync();
-            } else
-            {
-                var dialog = new MessageDialog("Download successful");
-
-                await dialog.ShowAsync();
+                case Enums.VideoStatus.DOWNLOADED:
+                    messageStr = "Downloaded successfully";
+                    break;
+                case Enums.VideoStatus.INVALID_URL:
+                    messageStr = "Invalid YT URL provided, please enter a new URL";
+                    break;
+                case Enums.VideoStatus.ERROR:
+                    messageStr = "There was an unexpected error while downloading";
+                    break;
             }
+
+            var dialog = new MessageDialog(messageStr);
+
+            await dialog.ShowAsync();
         }
     }
 }
