@@ -1,5 +1,5 @@
 ﻿using System;
-
+using Windows.Storage;
 using Windows.UI.Popups;
 using Windows.UI.Xaml.Controls;
 
@@ -41,5 +41,8 @@ namespace ytArchiver
 
             await dialog.ShowAsync();
         }
+
+        private async void btnOpenFolder_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e) => 
+            await Windows.System.Launcher.LaunchFolderAsync(await KnownFolders.GetFolderForUserAsync(null, KnownFolderId.VideosLibrary));
     }
 }

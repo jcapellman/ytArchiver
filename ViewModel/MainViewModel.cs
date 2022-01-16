@@ -80,14 +80,31 @@ namespace ytArchiver.ViewModel
             }
         }
 
+        private bool _DownloadSuccessful;
+
+        public bool DownloadSuccessful
+        {
+            get => _DownloadSuccessful;
+
+            set
+            {
+                _DownloadSuccessful = value;
+
+                OnPropertyChanged();
+            }
+        }
+
         public MainViewModel()
         {
             Downloading = Visibility.Collapsed;
             InfoVisibility = Visibility.Collapsed;
+            DownloadSuccessful = false;
         }
 
         public async Task<Enums.VideoStatus> DownloadAsync()
         {
+            DownloadSuccessful = false;
+
             Downloading = Visibility.Visible;
 
             VideoItem = new YTVideoItem(VideoURL);
@@ -110,6 +127,8 @@ namespace ytArchiver.ViewModel
             var result = await VideoItem.Download();
 
             Downloading = Visibility.Collapsed;
+
+            DownloadSuccessful = true;
 
             return result;
         }
